@@ -94,23 +94,3 @@ spec:
         type: object
     served: true
     storage: true
----
-apiVersion: apiextensions.k8s.io/v1
-kind: CustomResourceDefinition
-metadata:
-  name: rsoverviews.launchercontroller.k8s.io
-spec:
-  conversion:
-    strategy: None
-  group: launchercontroller.k8s.io
-  names:
-    kind: RsOverView
-    listKind: RsOverViewList
-    plural: rsoverviews
-    singular: rsoverview
-  preserveUnknownFields: true
-  scope: Cluster
-  versions:
-    - name: v1
-      served: true
-      storage: true
