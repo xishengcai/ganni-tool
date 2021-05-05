@@ -1,7 +1,7 @@
 package k8s
 
 var (
-	apiResourcesMap = map[string]string{
+	ApiResourcesMap = map[string]string{
 		"Service":                        "services",
 		"PersistentVolumeClaim":          "persistentvolumeclaims",
 		"Namespace":                      "namespaces",
