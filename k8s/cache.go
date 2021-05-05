@@ -28,7 +28,7 @@ func CleanK8sClientSetFromCache(clusterID interface{}) {
 
 // GetK8sClientSetFromCache get client from cache
 func GetK8sClientSetFromCache(dbg DataBaseConfig) (*KubernetesClient, error) {
-	k, ok := ClientCache.Get(dbg)
+	k, ok := ClientCache.Get(dbg.ClusterID)
 	if ok {
 		return k.(*KubernetesClient), nil
 	}
