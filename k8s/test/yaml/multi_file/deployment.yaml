@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: launcher
+  name: launcher
+  namespace: launcher-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: launcher
+  template:
+    metadata:
+      labels:
+        app: launcher
+    spec:
+      containers:
+        - image: nginx
+          name: nginx
