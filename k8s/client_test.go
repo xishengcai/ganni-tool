@@ -7,17 +7,16 @@ import (
 	"testing"
 )
 
-
-func TestGetClient(t *testing.T){
-	testCase := [] struct{
-		name string
+func TestGetClient(t *testing.T) {
+	testCase := []struct {
+		name      string
 		exception interface{}
-		config GetConfig
+		config    GetConfig
 	}{
 		{
-			name: "get kubeConfig from local path",
+			name:      "get kubeConfig from local path",
 			exception: nil,
-			config: PathConfig{},
+			config:    PathConfig{},
 		},
 		//{
 		//	name: "get kubeConfig from database",
@@ -25,10 +24,10 @@ func TestGetClient(t *testing.T){
 		//	config: DataBaseConfig{},
 		//},
 	}
-	for _, item := range testCase{
+	for _, item := range testCase {
 		t.Run(item.name, func(t *testing.T) {
-			k := KubernetesClient{}.setConfig(item.config).setClient()
-			_, err := k.CoreClient.AppsV1().Deployments("").List(context.TODO(),v1.ListOptions{})
+			k := KubernetesClient{}.setConfig(item.config).SetClient()
+			_, err := k.CoreClient.AppsV1().Deployments("").List(context.TODO(), v1.ListOptions{})
 			assert.Assert(t, err, item.exception)
 		})
 	}

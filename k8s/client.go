@@ -21,9 +21,9 @@ func (k *KubernetesClient) GetSlbIP() string {
 	return k.RestConfig.Host[0:x]
 }
 
-func (k *KubernetesClient) setClient() *KubernetesClient{
-	k.CoreClient,_  = kubernetes.NewForConfig(k.RestConfig)
-	k.DynamicClient,_ = dynamic.NewForConfig(k.RestConfig)
+func (k *KubernetesClient) SetClient() *KubernetesClient {
+	k.CoreClient, _ = kubernetes.NewForConfig(k.RestConfig)
+	k.DynamicClient, _ = dynamic.NewForConfig(k.RestConfig)
 	k.DiscoveryClient, _ = discovery.NewDiscoveryClientForConfig(k.RestConfig)
 	return k
 }
@@ -39,9 +39,9 @@ func (k *KubernetesClient) setClient() *KubernetesClient{
 //	return mapResources
 //}
 
-func (k KubernetesClient)setConfig(g GetConfig) *KubernetesClient{
+func (k KubernetesClient) setConfig(g GetConfig) *KubernetesClient {
 	config, err := g.getConfig()
-	if err != nil{
+	if err != nil {
 		panic(err)
 	}
 	k.RestConfig = config

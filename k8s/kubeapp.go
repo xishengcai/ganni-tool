@@ -67,7 +67,7 @@ func GetObjByYamlFile(filePath string) (objList []interface{}, err error) {
 			continue
 		}
 
-		obj, _, err := decode([]byte(objStr),nil, nil)
+		obj, _, err := decode([]byte(objStr), nil, nil)
 		if err != nil {
 			klog.Error("decode yaml fail err: ", err)
 			return nil, err

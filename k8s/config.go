@@ -61,7 +61,7 @@ func (dbg DataBaseConfig) getConfig() (*rest.Config, error) {
 }
 
 func (dbg DataBaseConfig) getClient() *KubernetesClient {
-	return KubernetesClient{}.setConfig(dbg).setClient()
+	return KubernetesClient{}.setConfig(dbg).SetClient()
 }
 
 // getRestConfig turn string to struct

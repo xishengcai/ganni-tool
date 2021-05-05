@@ -5,11 +5,11 @@ import (
 	"testing"
 )
 
-func TestCreate(t *testing.T){
+func TestCreate(t *testing.T) {
 	k := KubApp{
-		KubernetesClient: KubernetesClient{}.setConfig(PathConfig{}).setClient(),
+		KubernetesClient: KubernetesClient{}.setConfig(PathConfig{}).SetClient(),
 	}
-	testCases := []struct{
+	testCases := []struct {
 		name string
 		path string
 	}{
@@ -23,7 +23,7 @@ func TestCreate(t *testing.T){
 		},
 	}
 
-	for _, item := range testCases{
+	for _, item := range testCases {
 		t.Run(item.name, func(t *testing.T) {
 			objs, err := GetObjList(item.path)
 			assert.Assert(t, err, nil)
@@ -33,11 +33,11 @@ func TestCreate(t *testing.T){
 	}
 }
 
-func TestDelete(t *testing.T){
+func TestDelete(t *testing.T) {
 	k := KubApp{
-		KubernetesClient: KubernetesClient{}.setConfig(PathConfig{}).setClient(),
+		KubernetesClient: KubernetesClient{}.setConfig(PathConfig{}).SetClient(),
 	}
-	testCases := []struct{
+	testCases := []struct {
 		name string
 		path string
 	}{
@@ -47,7 +47,7 @@ func TestDelete(t *testing.T){
 		},
 	}
 
-	for _, item := range testCases{
+	for _, item := range testCases {
 		t.Run(item.name, func(t *testing.T) {
 			objs, err := GetObjList(item.path)
 			assert.Assert(t, err, nil)

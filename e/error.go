@@ -21,12 +21,12 @@ func printStack() {
 	klog.V(4).Infof("==> %s", string(buf[:n]))
 }
 
-func MergeError(errs []error) error{
-	if len(errs)==0{
+func MergeError(errs []error) error {
+	if len(errs) == 0 {
 		return nil
 	}
 	var msg strings.Builder
-	for _, item := range errs{
+	for _, item := range errs {
 		fmt.Println(&msg, item.Error())
 	}
 	return errors.New(msg.String())
