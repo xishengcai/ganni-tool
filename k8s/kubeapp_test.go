@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestApply(t *testing.T){
+func TestCreate(t *testing.T){
 	k := KubApp{
 		KubernetesClient: KubernetesClient{}.setConfig(PathConfig{}).setClient(),
 	}
@@ -27,7 +27,7 @@ func TestApply(t *testing.T){
 		t.Run(item.name, func(t *testing.T) {
 			objs, err := GetObjList(item.path)
 			assert.Assert(t, err, nil)
-			err = k.SetObjectList(objs).Do(ApplyObjectList)
+			err = k.SetObjectList(objs).Do(CreateObjectList)
 			assert.Assert(t, err, nil)
 		})
 	}

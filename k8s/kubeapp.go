@@ -149,7 +149,7 @@ func DeleteObjectList(k *KubernetesClient, objList []interface{}) error {
 	return nil
 }
 
-func ApplyObjectList(k *KubernetesClient, objList []interface{}) error {
+func CreateObjectList(k *KubernetesClient, objList []interface{}) error {
 	var errors []error
 	for _, obj := range objList {
 		o, ok := obj.(runtime.Object)
