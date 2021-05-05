@@ -5,7 +5,6 @@ import (
 )
 
 type Interface interface {
-	Create(desireObj *unstructured.Unstructured) error
 	Apply(desireObj *unstructured.Unstructured) error
 	Update(desireObj, clusterObj *unstructured.Unstructured) error
 	Delete(desireObj *unstructured.Unstructured) error
