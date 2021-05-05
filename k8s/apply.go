@@ -6,8 +6,8 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"ganni-tool/e"
-	"ganni-tool/file"
+	"github.com/xishengcai/ganni-tool/e"
+	"github.com/xishengcai/ganni-tool/file"
 
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"

@@ -1,4 +1,4 @@
-module ganni-tool
+module github.com/xishengcai/ganni-tool
 
 go 1.15
 
