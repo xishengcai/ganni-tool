@@ -116,7 +116,7 @@ func GetObjList(path string) (objs []interface{}, err error) {
 	return
 }
 
-func createObject(dynamicClient dynamic.Interface, obj runtime.Object, resourceMap map[string]string) error {
+func CreateObject(dynamicClient dynamic.Interface, obj runtime.Object, resourceMap map[string]string) error {
 	gvr, unStructuredObject := decodeToUnstructured(obj, resourceMap)
 	klog.Info("gvr: ", gvr)
 	_, err := dynamicClient.Resource(gvr).
@@ -125,7 +125,7 @@ func createObject(dynamicClient dynamic.Interface, obj runtime.Object, resourceM
 	return err
 }
 
-func deleteObject(dynamicClient dynamic.Interface, obj runtime.Object, resourceMap map[string]string) error {
+func DeleteObject(dynamicClient dynamic.Interface, obj runtime.Object, resourceMap map[string]string) error {
 	gvr, unStructuredObject := decodeToUnstructured(obj, resourceMap)
 	err := dynamicClient.Resource(gvr).
 		Namespace(unStructuredObject.GetNamespace()).
@@ -140,7 +140,7 @@ func DeleteObjectList(k *KubernetesClient, objList []interface{}) error {
 			klog.Errorf("obj is not k8s object")
 			continue
 		}
-		err := deleteObject(k.DynamicClient, o, apiResourcesMap)
+		err := DeleteObject(k.DynamicClient, o, apiResourcesMap)
 		if err != nil && !apierrs.IsNotFound(err) {
 			klog.Errorf("delete resource err: %v", err)
 			return err
@@ -157,7 +157,7 @@ func ApplyObjectList(k *KubernetesClient, objList []interface{}) error {
 			klog.Errorf("obj is not k8s object")
 			continue
 		}
-		err := createObject(k.DynamicClient, o, apiResourcesMap)
+		err := CreateObject(k.DynamicClient, o, apiResourcesMap)
 		if err != nil && !apierrs.IsAlreadyExists(err) && !strings.Contains(err.Error(), "already allocated") {
 			errors = append(errors, err)
 		}
