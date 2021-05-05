@@ -9,23 +9,24 @@ import (
 	"os"
 )
 
-var(
+var (
 	_ GetConfig = &PathConfig{}
 	_ GetConfig = &DataBaseConfig{}
 )
+
 type GetConfig interface {
 	getConfig() (*rest.Config, error)
 }
 
 type PathConfig struct {
-	path string
+	Path string
 }
 
-func (p PathConfig) getConfig() (*rest.Config, error){
-	if p.path == ""{
-		p.path = os.Getenv("HOME")+"/.kube/config"
+func (p PathConfig) getConfig() (*rest.Config, error) {
+	if p.Path == "" {
+		p.Path = os.Getenv("HOME") + "/.kube/config"
 	}
-	return getK8sClientsFromPath(p.path)
+	return getK8sClientsFromPath(p.Path)
 }
 
 func getK8sClientsFromPath(kubeConfigPath string) (*rest.Config, error) {
@@ -38,22 +39,22 @@ func getK8sClientsFromPath(kubeConfigPath string) (*rest.Config, error) {
 
 // DataBaseConfig 扩展支持从数据库中获取 kubeConfig
 type DataBaseConfig struct {
-	clusterID int64
-	getClusterConfig
+	ClusterID        int64
+	GetClusterConfig getClusterConfig
 }
 
 // getClusterConfig  需要用户实现自定义的获取缓存的方法
 type getClusterConfig func(clusterID interface{}) (kubernetesConfig string, err error)
 
 func (dbg DataBaseConfig) getConfig() (*rest.Config, error) {
-	klog.Infof("cluster id: %d, begin get string(kubeConfig).", dbg.clusterID)
-	config, err := dbg.getClusterConfig(dbg.clusterID)
+	klog.Infof("cluster id: %d, begin get string(kubeConfig).", dbg.ClusterID)
+	config, err := dbg.GetClusterConfig(dbg.ClusterID)
 	if err != nil {
 		return nil, err
 	}
 
-	if config == ""{
-		return nil, fmt.Errorf("clusterId: %d, config is null", dbg.clusterID)
+	if config == "" {
+		return nil, fmt.Errorf("clusterId: %d, config is null", dbg.ClusterID)
 	}
 
 	return getRestConfig(config)
@@ -62,7 +63,6 @@ func (dbg DataBaseConfig) getConfig() (*rest.Config, error) {
 func (dbg DataBaseConfig) getClient() *KubernetesClient {
 	return KubernetesClient{}.setConfig(dbg).setClient()
 }
-
 
 // getRestConfig turn string to struct
 func getRestConfig(config string) (restConfig *rest.Config, err error) {

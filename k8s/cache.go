@@ -34,7 +34,7 @@ func GetK8sClientSetFromCache(dbg DataBaseConfig) (*KubernetesClient, error) {
 	}
 	lock.Lock() // 多个线程并发添加缓存，避免重复添加操作
 	defer lock.Unlock()
-	k, ok = ClientCache.Get(dbg.clusterID)
+	k, ok = ClientCache.Get(dbg.ClusterID)
 	if ok {
 		return k.(*KubernetesClient), nil
 	}
@@ -42,13 +42,13 @@ func GetK8sClientSetFromCache(dbg DataBaseConfig) (*KubernetesClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	k, _ = ClientCache.Get(dbg.clusterID)
+	k, _ = ClientCache.Get(dbg.ClusterID)
 	return k.(*KubernetesClient), nil
 }
 
 // addNewClientToMap 传递一个获取kubernetes config的方法和数据库解耦
 func addNewClientToMap(dbg DataBaseConfig) (err error) {
-	ClientCache.Add(dbg.clusterID, dbg.getClient())
-	klog.Infof("cluster id :%d, add new kubernetes all k8s success", dbg.clusterID)
+	ClientCache.Add(dbg.ClusterID, dbg.getClient())
+	klog.Infof("cluster id :%d, add new kubernetes all k8s success", dbg.ClusterID)
 	return
 }
