@@ -7,7 +7,7 @@ import (
 
 func TestCreate(t *testing.T) {
 	k := KubApp{
-		KubernetesClient: KubernetesClient{}.setConfig(PathConfig{}).SetClient(),
+		KubernetesClient: KubernetesClient{}.SetConfig(PathConfig{}).SetClient(),
 	}
 	testCases := []struct {
 		name string
@@ -35,7 +35,7 @@ func TestCreate(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	k := KubApp{
-		KubernetesClient: KubernetesClient{}.setConfig(PathConfig{}).SetClient(),
+		KubernetesClient: KubernetesClient{}.SetConfig(PathConfig{}).SetClient(),
 	}
 	testCases := []struct {
 		name string

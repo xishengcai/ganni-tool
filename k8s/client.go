@@ -39,8 +39,8 @@ func (k *KubernetesClient) SetClient() *KubernetesClient {
 //	return mapResources
 //}
 
-func (k KubernetesClient) setConfig(g GetConfig) *KubernetesClient {
-	config, err := g.getConfig()
+func (k KubernetesClient) SetConfig(g GetConfig) *KubernetesClient {
+	config, err := g.GetConfig()
 	if err != nil {
 		panic(err)
 	}
