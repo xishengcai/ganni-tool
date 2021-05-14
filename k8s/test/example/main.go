@@ -1,20 +1,3 @@
-# client
-
-## function
--[x] create
--[x] delete 
--[x] apply
--[ ] patch
-
-## spurt input type
--[x] file
--[x] []byte
-
-## spurt cache
-
-
-## usage example
-```go
 package main
 
 import (
@@ -32,11 +15,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	err = k.SetObjectList(objs).Do(CreateObjectList)
+	err = k.SetObjectList(objs).Do(ApplyObjectList)
 	if err != nil {
 		klog.Error(err)
 	}
 
 }
-
-```

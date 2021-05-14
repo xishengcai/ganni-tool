@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: launcher-svc
+  name: launcher-svc
+  namespace: launcher-test
+spec:
+  ports:
+    - port: 90
+      protocol: TCP
+      targetPort: 80
+      name: xxx
+  selector:
+    app: launcher
+---
+# apply test, not found, then create new
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: launcher-svc-new
+  name: launcher-svc-new
+  namespace: launcher-test
+spec:
+  ports:
+    - port: 90
+      protocol: TCP
+      targetPort: 80
+      name: xxx
+  selector:
+    app: launcher

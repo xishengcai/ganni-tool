@@ -3,9 +3,10 @@ package e
 import (
 	"errors"
 	"fmt"
-	"k8s.io/klog"
 	"runtime"
 	"strings"
+
+	"k8s.io/klog"
 )
 
 func RecoverGoPanic() {

@@ -26,7 +26,7 @@ func TestGetClient(t *testing.T) {
 	}
 	for _, item := range testCase {
 		t.Run(item.name, func(t *testing.T) {
-			k := KubernetesClient{}.setConfig(item.config).SetClient()
+			k := KubernetesClient{}.SetConfig(item.config).SetClient()
 			_, err := k.CoreClient.AppsV1().Deployments("").List(context.TODO(), v1.ListOptions{})
 			assert.Assert(t, err, item.exception)
 		})

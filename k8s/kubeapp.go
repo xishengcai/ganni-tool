@@ -1,21 +1,31 @@
 package k8s
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
+	"io"
 	"io/ioutil"
 	"strings"
+
+	"k8s.io/apimachinery/pkg/util/yaml"
+
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/xishengcai/ganni-tool/e"
 	"github.com/xishengcai/ganni-tool/file"
 
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/dynamic"
 	"k8s.io/klog"
+)
+
+var (
+	decode = unstructured.UnstructuredJSONScheme
 )
 
 type KubApp struct {
@@ -60,24 +70,29 @@ func GetObjByYamlFile(filePath string) (objList []interface{}, err error) {
 	if err != nil {
 		return
 	}
-	for _, objStr := range strings.Split(string(ioBytes), "---") {
-		klog.V(4).Infof("obj string: %s", objStr)
-		// 过滤空数据
-		if len(strings.Replace(strings.Replace(objStr, " ", "", -1), "\n", "", -1)) == 0 {
-			continue
-		}
 
-		obj, _, err := decode([]byte(objStr), nil, nil)
+	d := yaml.NewYAMLOrJSONDecoder(bytes.NewReader(ioBytes), 4096)
+	for {
+		ext := runtime.RawExtension{}
+		if err := d.Decode(&ext); err != nil {
+			if err == io.EOF {
+				return objList, nil
+			}
+		}
+		// TODO: This needs to be able to handle object in other encodings and schemas.
+		ext.Raw = bytes.TrimSpace(ext.Raw)
+		if len(ext.Raw) == 0 || bytes.Equal(ext.Raw, []byte("null")) {
+			return objList, nil
+		}
+		obj, _, err := decode.Decode(ext.Raw, nil, nil)
 		if err != nil {
-			klog.Error("decode yaml fail err: ", err)
 			return nil, err
 		}
 		objList = append(objList, obj)
-		//if obj.GetObjectKind().GroupVersionKind().Kind == "Namespace"{
-		//	objList[0],objList[len(objList)-1] = objList[len(objList)-1], objList[0]
-		//}
+		if obj.GetObjectKind().GroupVersionKind().Kind == "Namespace" {
+			objList[0], objList[len(objList)-1] = objList[len(objList)-1], objList[0]
+		}
 	}
-
 	return
 }
 
@@ -89,7 +104,7 @@ func decodeBytes(ioBytes []byte) (objList []interface{}, err error) {
 			continue
 		}
 
-		obj, _, err := decode([]byte(objStr), nil, nil)
+		obj, _, err := decode.Decode([]byte(objStr), nil, nil)
 		if err != nil {
 			klog.Error("decode yaml fail err: ", err)
 			return nil, err
@@ -110,43 +125,41 @@ func GetObjList(path string) (objs []interface{}, err error) {
 		if err != nil {
 			return nil, err
 		}
-		klog.Infof("objList length: %d", len(objList))
+		klog.Infof("path: %s, found k8s object: %d", path, len(objList))
 		objs = append(objs, objList...)
 	}
 	return
 }
 
-func CreateObject(dynamicClient dynamic.Interface, obj runtime.Object, resourceMap map[string]string) error {
-	gvr, unStructuredObject := decodeToUnstructured(obj, resourceMap)
-	klog.Info("gvr: ", gvr)
-	_, err := dynamicClient.Resource(gvr).
-		Namespace(unStructuredObject.GetNamespace()).
-		Create(context.TODO(), unStructuredObject, v1.CreateOptions{})
-	return err
-}
-
-func DeleteObject(dynamicClient dynamic.Interface, obj runtime.Object) error {
-	gvr, unStructuredObject := decodeToUnstructured(obj, ApiResourcesMap)
-	err := dynamicClient.Resource(gvr).
-		Namespace(unStructuredObject.GetNamespace()).
-		Delete(context.TODO(), unStructuredObject.GetName(), v1.DeleteOptions{})
+func CreateObject(k *KubernetesClient, obj runtime.Object) error {
+	gvrObj, err := decodeToUnstructured(obj, k)
+	if err != nil {
+		return err
+	}
+	_, err = k.DynamicClient.Resource(gvrObj.gvr).
+		Namespace(gvrObj.unstructured.GetNamespace()).
+		Create(context.TODO(), gvrObj.unstructured, v1.CreateOptions{})
 	return err
 }
 
 func DeleteObjectList(k *KubernetesClient, objList []interface{}) error {
-	for _, obj := range objList {
-		o, ok := obj.(runtime.Object)
-		if !ok {
-			klog.Errorf("obj is not k8s object")
+	var errors []error
+	gvrObjList, err := turnObjToUnStruct(objList, k)
+	if err != nil {
+		return err
+	}
+	for _, item := range gvrObjList {
+		err := k.DynamicClient.Resource(item.gvr).
+			Namespace(item.unstructured.GetNamespace()).
+			Delete(context.TODO(), item.unstructured.GetName(), v1.DeleteOptions{})
+		if apierrs.IsNotFound(err) {
 			continue
 		}
-		err := DeleteObject(k.DynamicClient, o)
-		if err != nil && !apierrs.IsNotFound(err) {
-			klog.Errorf("delete resource err: %v", err)
-			return err
+		if err != nil {
+			errors = append(errors, err)
 		}
 	}
-	return nil
+	return e.MergeError(errors)
 }
 
 func CreateObjectList(k *KubernetesClient, objList []interface{}) error {
@@ -157,7 +170,7 @@ func CreateObjectList(k *KubernetesClient, objList []interface{}) error {
 			klog.Errorf("obj is not k8s object")
 			continue
 		}
-		err := CreateObject(k.DynamicClient, o, ApiResourcesMap)
+		err := CreateObject(k, o)
 		if err != nil && !apierrs.IsAlreadyExists(err) && !strings.Contains(err.Error(), "already allocated") {
 			errors = append(errors, err)
 		}
@@ -165,13 +178,20 @@ func CreateObjectList(k *KubernetesClient, objList []interface{}) error {
 	return e.MergeError(errors)
 }
 
-func decodeToUnstructured(obj runtime.Object, resourceMap map[string]string) (schema.GroupVersionResource, *unstructured.Unstructured) {
+func decodeToUnstructured(obj runtime.Object, k *KubernetesClient) (*GvrObj, error) {
 	groupVersion := obj.GetObjectKind().GroupVersionKind().GroupVersion().Version
 	group := obj.GetObjectKind().GroupVersionKind().Group
-	resource := resourceMap[obj.GetObjectKind().GroupVersionKind().Kind]
+	resource, ok := k.resourceMapper[obj.GetObjectKind().GroupVersionKind().Kind]
+	if !ok {
+		k.refreshApiResources()
+		resource, ok = k.resourceMapper[obj.GetObjectKind().GroupVersionKind().Kind]
+		if !ok {
+			return nil, fmt.Errorf("not found groupVersion: %s, group: %s, resource: %s", groupVersion, group, resource)
+		}
+	}
 
 	klog.Infof("groupVersion: %s, group: %s, resource: %s", groupVersion, group, resource)
-	objGVR := schema.GroupVersionResource{
+	gvr := schema.GroupVersionResource{
 		Group:    group,
 		Version:  groupVersion,
 		Resource: resource,
@@ -180,8 +200,68 @@ func decodeToUnstructured(obj runtime.Object, resourceMap map[string]string) (sc
 	unStructuredObject := &unstructured.Unstructured{}
 	b, _ := json.Marshal(obj)
 	err := json.Unmarshal(b, &unStructuredObject)
-	if err != nil {
-		klog.Fatal("json.Unmarshal error: ", err)
+	return &GvrObj{gvr, unStructuredObject}, err
+}
+
+func ApplyObjectList(k *KubernetesClient, objList []interface{}) error {
+	var errors []error
+	for _, obj := range objList {
+		o, ok := obj.(runtime.Object)
+		if !ok {
+			klog.Errorf("obj is not k8s object")
+			continue
+		}
+		gvrObj, err := decodeToUnstructured(o, k)
+		if err != nil {
+			return err
+		}
+		err = patch(k.Client, gvrObj.unstructured, client.Merge)
+		if apierrs.IsNotFound(err) {
+			if err2 := CreateObject(k, gvrObj.unstructured); err2 != nil {
+				errors = append(errors, err2)
+			}
+			continue
+		}
+		if err != nil {
+			errors = append(errors, err)
+		}
+
 	}
-	return objGVR, unStructuredObject
+	return e.MergeError(errors)
+}
+
+func patch(c client.Client, obj client.Object, patchType client.Patch) error {
+	return c.Patch(context.TODO(), obj, patchType, &client.PatchOptions{
+		FieldManager: "apply"})
+}
+
+type GvrObj struct {
+	gvr          schema.GroupVersionResource
+	unstructured *unstructured.Unstructured
+}
+
+func turnObjToUnStruct(objList []interface{}, k *KubernetesClient) ([]*GvrObj, error) {
+	gvrObjList := make([]*GvrObj, 0)
+	namespaceGvrUns := make([]*GvrObj, 0)
+
+	for _, obj := range objList {
+		o, ok := obj.(runtime.Object)
+		if !ok {
+			klog.Errorf("obj is not k8s object")
+			continue
+		}
+
+		gvrObj, err := decodeToUnstructured(o, k)
+		if err != nil {
+			return nil, err
+		}
+
+		if gvrObj.gvr.Resource == "namespaces" {
+			namespaceGvrUns = append(namespaceGvrUns, gvrObj)
+		} else {
+			gvrObjList = append(gvrObjList, gvrObj)
+		}
+	}
+	gvrObjList = append(gvrObjList, namespaceGvrUns...)
+	return gvrObjList, nil
 }

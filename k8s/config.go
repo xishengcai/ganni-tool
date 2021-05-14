@@ -15,14 +15,14 @@ var (
 )
 
 type GetConfig interface {
-	getConfig() (*rest.Config, error)
+	GetConfig() (*rest.Config, error)
 }
 
 type PathConfig struct {
 	Path string
 }
 
-func (p PathConfig) getConfig() (*rest.Config, error) {
+func (p PathConfig) GetConfig() (*rest.Config, error) {
 	if p.Path == "" {
 		p.Path = os.Getenv("HOME") + "/.kube/config"
 	}
@@ -46,7 +46,7 @@ type DataBaseConfig struct {
 // getClusterConfig  需要用户实现自定义的获取缓存的方法
 type getClusterConfig func(clusterID interface{}) (kubernetesConfig string, err error)
 
-func (dbg DataBaseConfig) getConfig() (*rest.Config, error) {
+func (dbg DataBaseConfig) GetConfig() (*rest.Config, error) {
 	klog.Infof("cluster id: %d, begin get string(kubeConfig).", dbg.ClusterID)
 	config, err := dbg.GetClusterConfig(dbg.ClusterID)
 	if err != nil {
@@ -60,8 +60,8 @@ func (dbg DataBaseConfig) getConfig() (*rest.Config, error) {
 	return getRestConfig(config)
 }
 
-func (dbg DataBaseConfig) getClient() *KubernetesClient {
-	return KubernetesClient{}.setConfig(dbg).SetClient()
+func (dbg DataBaseConfig) GetClient() *KubernetesClient {
+	return KubernetesClient{}.SetConfig(dbg).SetClient()
 }
 
 // getRestConfig turn string to struct

@@ -1,7 +1,11 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: launcher-test
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  creationTimestamp: null
   labels:
     app: launcher
   name: launcher

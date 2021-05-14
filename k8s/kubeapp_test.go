@@ -1,13 +1,14 @@
 package k8s
 
 import (
-	"gotest.tools/assert"
 	"testing"
+
+	"gotest.tools/assert"
 )
 
 func TestCreate(t *testing.T) {
 	k := KubApp{
-		KubernetesClient: KubernetesClient{}.setConfig(PathConfig{}).SetClient(),
+		KubernetesClient: KubernetesClient{}.SetConfig(PathConfig{}).SetClient(),
 	}
 	testCases := []struct {
 		name string
@@ -21,6 +22,10 @@ func TestCreate(t *testing.T) {
 			name: "create from file",
 			path: "./test/yaml/all_in_one/svc.yaml",
 		},
+		{
+			name: "create from file",
+			path: "./test/yaml/crd/crd.yaml",
+		},
 	}
 
 	for _, item := range testCases {
@@ -33,17 +38,41 @@ func TestCreate(t *testing.T) {
 	}
 }
 
-func TestDelete(t *testing.T) {
+func TestApply(t *testing.T) {
 	k := KubApp{
-		KubernetesClient: KubernetesClient{}.setConfig(PathConfig{}).SetClient(),
+		KubernetesClient: KubernetesClient{}.SetConfig(PathConfig{}).SetClient(),
 	}
 	testCases := []struct {
 		name string
 		path string
 	}{
 		{
-			name: "create from file",
-			path: "./test/yaml/all_in_one/svc.yaml",
+			name: "create from file dir",
+			path: "./test/yaml/apply",
+		},
+	}
+
+	for _, item := range testCases {
+		t.Run(item.name, func(t *testing.T) {
+			objs, err := GetObjList(item.path)
+			assert.Assert(t, err, nil)
+			err = k.SetObjectList(objs).Do(ApplyObjectList)
+			assert.Assert(t, err, nil)
+		})
+	}
+}
+
+func TestDelete(t *testing.T) {
+	k := KubApp{
+		KubernetesClient: KubernetesClient{}.SetConfig(PathConfig{}).SetClient(),
+	}
+	testCases := []struct {
+		name string
+		path string
+	}{
+		{
+			name: "delete from file",
+			path: "./test/yaml/delete",
 		},
 	}
 
