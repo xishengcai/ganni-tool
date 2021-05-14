@@ -49,9 +49,7 @@ func GetK8sClientSetFromCache(dbg DataBaseConfig) (*KubernetesClient, error) {
 
 // addNewClientToMap 传递一个获取kubernetes config的方法和数据库解耦
 func addNewClientToMap(dbg DataBaseConfig) (err error) {
-	c := &KubernetesClient{}
-	c.SetConfig(dbg).SetClient()
-	ClientCache.Add(dbg.ClusterID, c)
+	ClientCache.Add(dbg.ClusterID, dbg.GetClient())
 	klog.Infof("cluster id :%d, add new kubernetes all k8s success", dbg.ClusterID)
 	return
 }
