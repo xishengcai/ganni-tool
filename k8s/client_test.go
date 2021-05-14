@@ -4,9 +4,7 @@ import (
 	"context"
 	"gotest.tools/assert"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"testing"
-	"time"
 )
 
 func TestGetClient(t *testing.T) {
@@ -33,38 +31,4 @@ func TestGetClient(t *testing.T) {
 			assert.Assert(t, err, item.exception)
 		})
 	}
-}
-
-func TestCRD(t *testing.T) {
-	const (
-		ResourceOverview          = "rsoverviews"
-		ResourceOverviewGroupName = "launchercontroller.k8s.io"
-		ResourceOverViewVersion   = "v1"
-		ResourceOverviewCrdName   = "lau-crd-resource-overview"
-	)
-	rsviewGvr := schema.GroupVersionResource{
-		Version:  ResourceOverViewVersion,
-		Group:    ResourceOverviewGroupName,
-		Resource: ResourceOverview,
-	}
-
-	p := PathConfig{}
-	config, _ := p.GetConfig()
-	config.Timeout = 2 * time.Second
-	k := KubernetesClient{RestConfig: config}
-	k.SetClient()
-
-	t.Run("get crd", func(t *testing.T) {
-		for {
-			_, err := k.DynamicClient.
-				Resource(rsviewGvr).
-				Get(context.TODO(), ResourceOverviewCrdName, v1.GetOptions{})
-			if err != nil {
-				t.Error(err)
-			}
-			t.Log("ok")
-			time.Sleep(1 * time.Second)
-		}
-	})
-
 }

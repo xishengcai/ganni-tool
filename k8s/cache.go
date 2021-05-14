@@ -1,9 +1,10 @@
 package k8s
 
 import (
+	"sync"
+
 	lru "github.com/hashicorp/golang-lru"
 	"k8s.io/klog"
-	"sync"
 )
 
 /*
