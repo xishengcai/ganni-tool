@@ -1,14 +1,15 @@
 # client
 
 ## function
--[x] create
--[x] delete 
--[x] apply
--[ ] patch
+- [x] create
+- [x] delete 
+- [x] apply
+- [ ] patch
 
 ## spurt input type
--[x] file
--[x] []byte
+- [x] file
+- [x] []byte
+- [ ] url
 
 ## spurt cache
 
