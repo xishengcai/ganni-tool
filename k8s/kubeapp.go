@@ -61,7 +61,31 @@ func GetKubernetesObjectByPath(path []string) (objs []interface{}, err error) {
 }
 
 func GetKubernetesObjectByBytes(ioBytes []byte) ([]interface{}, error) {
-	return decodeBytes(ioBytes)
+	objList := make([]interface{}, 0)
+	d := yaml.NewYAMLOrJSONDecoder(bytes.NewReader(ioBytes), 4096)
+
+	for {
+		ext := runtime.RawExtension{}
+		if err := d.Decode(&ext); err != nil {
+			if err == io.EOF {
+				return objList, nil
+			}
+		}
+		// TODO: This needs to be able to handle object in other encodings and schemas.
+		ext.Raw = bytes.TrimSpace(ext.Raw)
+		if len(ext.Raw) == 0 || bytes.Equal(ext.Raw, []byte("null")) {
+			return objList, nil
+		}
+		obj, _, err := decode.Decode(ext.Raw, nil, nil)
+		if err != nil {
+			return nil, err
+		}
+		objList = append(objList, obj)
+		if obj.GetObjectKind().GroupVersionKind().Kind == "Namespace" {
+			objList[0], objList[len(objList)-1] = objList[len(objList)-1], objList[0]
+		}
+	}
+
 }
 
 func GetObjByYamlFile(filePath string) (objList []interface{}, err error) {
@@ -93,25 +117,6 @@ func GetObjByYamlFile(filePath string) (objList []interface{}, err error) {
 			objList[0], objList[len(objList)-1] = objList[len(objList)-1], objList[0]
 		}
 	}
-	return
-}
-
-func decodeBytes(ioBytes []byte) (objList []interface{}, err error) {
-	for _, objStr := range strings.Split(string(ioBytes), "---") {
-		klog.V(4).Infof("obj string: %s", objStr)
-		// 过滤空数据
-		if len(strings.Replace(strings.Replace(objStr, " ", "", -1), "\n", "", -1)) == 0 {
-			continue
-		}
-
-		obj, _, err := decode.Decode([]byte(objStr), nil, nil)
-		if err != nil {
-			klog.Error("decode yaml fail err: ", err)
-			return nil, err
-		}
-		objList = append(objList, obj)
-	}
-	return
 }
 
 func GetObjList(path string) (objs []interface{}, err error) {

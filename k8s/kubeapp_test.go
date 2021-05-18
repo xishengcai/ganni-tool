@@ -1,6 +1,7 @@
 package k8s
 
 import (
+	"strings"
 	"testing"
 
 	"gotest.tools/assert"
@@ -84,4 +85,53 @@ func TestDelete(t *testing.T) {
 			assert.Assert(t, err, nil)
 		})
 	}
+}
+
+var (
+	installTemplate = `
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lstack-system
+  labels:
+    app.kubernetes.io/name: lstack-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: lau-controller
+  namespace: lstack-system
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lsh-cluster-lcs-controller
+  labels:
+    app: lsh-cluster-lcs-controller
+  namespace: lstack-system
+spec:
+  ports:
+    - port: 443
+      name: webhook
+      targetPort: 443
+    - port: 80
+      name: loginfo
+      targetPort: 80
+  selector:
+    app: lsh-cluster-lcs-controller
+`
+)
+
+func transformInstallTemplate() string {
+	return strings.Replace(installTemplate, "lsh-cluster-lcs-controller.image", "nginx", -1)
+}
+
+func TestCreateObjectFromTemplate(t *testing.T) {
+	k := KubApp{
+		KubernetesClient: KubernetesClient{}.SetConfig(PathConfig{}).SetClient(),
+	}
+	objs, err := GetKubernetesObjectByBytes([]byte(transformInstallTemplate()))
+	assert.Assert(t, err, nil)
+	err = k.SetObjectList(objs).Do(CreateObjectList)
+	assert.Assert(t, err, nil)
 }
