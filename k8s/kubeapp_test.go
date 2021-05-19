@@ -97,12 +97,6 @@ metadata:
     app.kubernetes.io/name: lstack-system
 ---
 apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: lau-controller
-  namespace: lstack-system
----
-apiVersion: v1
 kind: Service
 metadata:
   name: lsh-cluster-lcs-controller

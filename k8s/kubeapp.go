@@ -204,10 +204,10 @@ func decodeToUnstructured(obj runtime.Object, k *KubernetesClient) (*GvrObj, err
 
 func ApplyObjectList(k *KubernetesClient, objList []interface{}) error {
 	var errors []error
-	for _, obj := range objList {
+	for index, obj := range objList {
 		o, ok := obj.(runtime.Object)
 		if !ok {
-			klog.Errorf("obj is not k8s object")
+			errors = append(errors, fmt.Errorf("object [%d] is not k8s object", index))
 			continue
 		}
 		gvrObj, err := decodeToUnstructured(o, k)
@@ -216,8 +216,8 @@ func ApplyObjectList(k *KubernetesClient, objList []interface{}) error {
 		}
 		err = patch(k.Client, gvrObj.unstructured, client.Merge)
 		if apierrs.IsNotFound(err) {
-			if err2 := CreateObject(k, gvrObj.unstructured); err2 != nil {
-				errors = append(errors, err2)
+			if err = CreateObject(k, gvrObj.unstructured); err != nil {
+				errors = append(errors, err)
 			}
 			continue
 		}
