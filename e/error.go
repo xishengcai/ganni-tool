@@ -1,7 +1,6 @@
 package e
 
 import (
-	"errors"
 	"fmt"
 	"runtime"
 	"strings"
@@ -27,8 +26,11 @@ func MergeError(errs []error) error {
 		return nil
 	}
 	var msg strings.Builder
-	for _, item := range errs {
-		fmt.Println(&msg, item.Error())
+	for index, item := range errs {
+		if index != 0 {
+			msg.Write([]byte("\n"))
+		}
+		msg.Write([]byte(item.Error()))
 	}
-	return errors.New(msg.String())
+	return fmt.Errorf(msg.String())
 }

@@ -6,6 +6,7 @@ require (
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/onsi/ginkgo v1.14.1 // indirect
 	github.com/onsi/gomega v1.10.2 // indirect
+	github.com/pkg/errors v0.9.1
 	gotest.tools v2.2.0+incompatible
 	k8s.io/api v0.21.0
 	k8s.io/apiextensions-apiserver v0.21.0
