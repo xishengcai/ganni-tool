@@ -81,9 +81,6 @@ func GetKubernetesObjectByBytes(ioBytes []byte) ([]interface{}, error) {
 			return nil, err
 		}
 		objList = append(objList, obj)
-		if obj.GetObjectKind().GroupVersionKind().Kind == "Namespace" {
-			objList[0], objList[len(objList)-1] = objList[len(objList)-1], objList[0]
-		}
 	}
 
 }
@@ -113,9 +110,6 @@ func GetObjByYamlFile(filePath string) (objList []interface{}, err error) {
 			return nil, err
 		}
 		objList = append(objList, obj)
-		if obj.GetObjectKind().GroupVersionKind().Kind == "Namespace" {
-			objList[0], objList[len(objList)-1] = objList[len(objList)-1], objList[0]
-		}
 	}
 }
 

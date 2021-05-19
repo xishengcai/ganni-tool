@@ -126,12 +126,12 @@ func transformInstallTemplate() string {
 	return strings.Replace(installTemplate, "lsh-cluster-lcs-controller.image", "nginx", -1)
 }
 
-func TestCreateObjectFromTemplate(t *testing.T) {
+func TestApplyObjectFromTemplate(t *testing.T) {
 	k := KubApp{
 		KubernetesClient: KubernetesClient{}.SetConfig(PathConfig{}).SetClient(),
 	}
 	objs, err := GetKubernetesObjectByBytes([]byte(transformInstallTemplate()))
 	assert.Assert(t, err, nil)
-	err = k.SetObjectList(objs).Do(CreateObjectList)
+	err = k.SetObjectList(objs).Do(ApplyObjectList)
 	assert.Assert(t, err, nil)
 }
