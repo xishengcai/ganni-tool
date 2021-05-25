@@ -135,9 +135,9 @@ func CreateObject(k *KubernetesClient, obj runtime.Object) error {
 	if err != nil {
 		return err
 	}
-	_, err = k.DynamicClient.Resource(gvrObj.gvr).
-		Namespace(gvrObj.unstructured.GetNamespace()).
-		Create(context.TODO(), gvrObj.unstructured, v1.CreateOptions{})
+	_, err = k.DynamicClient.Resource(gvrObj.Gvr).
+		Namespace(gvrObj.Unstructured.GetNamespace()).
+		Create(context.TODO(), gvrObj.Unstructured, v1.CreateOptions{})
 	return err
 }
 
@@ -148,9 +148,9 @@ func DeleteObjectList(k *KubernetesClient, objList []interface{}) error {
 		return err
 	}
 	for _, item := range gvrObjList {
-		err := k.DynamicClient.Resource(item.gvr).
-			Namespace(item.unstructured.GetNamespace()).
-			Delete(context.TODO(), item.unstructured.GetName(), v1.DeleteOptions{})
+		err := k.DynamicClient.Resource(item.Gvr).
+			Namespace(item.Unstructured.GetNamespace()).
+			Delete(context.TODO(), item.Unstructured.GetName(), v1.DeleteOptions{})
 		if apierrs.IsNotFound(err) {
 			continue
 		}
@@ -214,9 +214,9 @@ func ApplyObjectList(k *KubernetesClient, objList []interface{}) error {
 		if err != nil {
 			return err
 		}
-		err = patch(k.Client, gvrObj.unstructured, client.Merge)
+		err = patch(k.Client, gvrObj.Unstructured, client.Merge)
 		if apierrs.IsNotFound(err) {
-			if err = CreateObject(k, gvrObj.unstructured); err != nil {
+			if err = CreateObject(k, gvrObj.Unstructured); err != nil {
 				errors = append(errors, err)
 			}
 			continue
@@ -235,8 +235,8 @@ func patch(c client.Client, obj client.Object, patchType client.Patch) error {
 }
 
 type GvrObj struct {
-	gvr          schema.GroupVersionResource
-	unstructured *unstructured.Unstructured
+	Gvr          schema.GroupVersionResource
+	Unstructured *unstructured.Unstructured
 }
 
 func turnObjToUnStruct(objList []interface{}, k *KubernetesClient) ([]*GvrObj, error) {
@@ -255,7 +255,7 @@ func turnObjToUnStruct(objList []interface{}, k *KubernetesClient) ([]*GvrObj, e
 			return nil, err
 		}
 
-		if gvrObj.gvr.Resource == "namespaces" {
+		if gvrObj.Gvr.Resource == "namespaces" {
 			namespaceGvrUns = append(namespaceGvrUns, gvrObj)
 		} else {
 			gvrObjList = append(gvrObjList, gvrObj)
