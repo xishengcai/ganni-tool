@@ -3,15 +3,18 @@ package k8s
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
+
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog"
-	"os"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 var (
 	_ GetConfig = &PathConfig{}
 	_ GetConfig = &DataBaseConfig{}
+	_ GetConfig = &InCluster{}
 )
 
 type GetConfig interface {
@@ -62,6 +65,15 @@ func (dbg DataBaseConfig) GetConfig() (*rest.Config, error) {
 
 func (dbg DataBaseConfig) GetClient() *KubernetesClient {
 	return KubernetesClient{}.SetConfig(dbg).SetClient()
+}
+
+// InCluster pod run in cluster
+type InCluster struct {
+}
+
+func (i InCluster) GetConfig() (*rest.Config, error) {
+	config := ctrl.GetConfigOrDie()
+	return config, nil
 }
 
 // getRestConfig turn string to struct

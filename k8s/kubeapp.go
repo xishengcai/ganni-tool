@@ -131,7 +131,7 @@ func GetObjList(path string) (objs []interface{}, err error) {
 }
 
 func CreateObject(k *KubernetesClient, obj runtime.Object) error {
-	gvrObj, err := decodeToUnstructured(obj, k)
+	gvrObj, err := DecodeToGvrObj(obj, k)
 	if err != nil {
 		return err
 	}
@@ -177,7 +177,7 @@ func CreateObjectList(k *KubernetesClient, objList []interface{}) error {
 	return e.MergeError(errors)
 }
 
-func decodeToUnstructured(obj runtime.Object, k *KubernetesClient) (*GvrObj, error) {
+func DecodeToGvrObj(obj runtime.Object, k *KubernetesClient) (*GvrObj, error) {
 	groupVersion := obj.GetObjectKind().GroupVersionKind().GroupVersion().Version
 	group := obj.GetObjectKind().GroupVersionKind().Group
 	resource, ok := k.resourceMapper[obj.GetObjectKind().GroupVersionKind().Kind]
@@ -210,7 +210,7 @@ func ApplyObjectList(k *KubernetesClient, objList []interface{}) error {
 			errors = append(errors, fmt.Errorf("object [%d] is not k8s object", index))
 			continue
 		}
-		gvrObj, err := decodeToUnstructured(o, k)
+		gvrObj, err := DecodeToGvrObj(o, k)
 		if err != nil {
 			return err
 		}
@@ -250,7 +250,7 @@ func turnObjToUnStruct(objList []interface{}, k *KubernetesClient) ([]*GvrObj, e
 			continue
 		}
 
-		gvrObj, err := decodeToUnstructured(o, k)
+		gvrObj, err := DecodeToGvrObj(o, k)
 		if err != nil {
 			return nil, err
 		}

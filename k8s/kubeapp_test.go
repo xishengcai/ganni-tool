@@ -189,3 +189,11 @@ func TestApplyObjectFromTemplate(t *testing.T) {
 	}
 
 }
+
+func TestGetKubernetesObjectByPath(t *testing.T) {
+	obj, err := GetKubernetesObjectByPath([]string{"./test/yaml/crd/crd.yaml"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("%v", obj[0])
+}
