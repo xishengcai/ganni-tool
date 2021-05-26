@@ -196,13 +196,21 @@ func DecodeToGvrObj(obj runtime.Object, k *KubernetesClient) (*GvrObj, error) {
 		Resource: resource,
 	}
 
-	unStructuredObject := &unstructured.Unstructured{}
+	u := &unstructured.Unstructured{}
 	b, _ := json.Marshal(obj)
-	err := json.Unmarshal(b, &unStructuredObject)
-	return &GvrObj{gvr, unStructuredObject}, err
+	err := json.Unmarshal(b, &u)
+
+	// TODO: some resource want to add namespace, but crd add namespace may error
+	//if u.GetNamespace() == "" {
+	//	u.SetNamespace("default")
+	//}
+	return &GvrObj{gvr, u}, err
 }
 
-func ApplyObjectList(k *KubernetesClient, objList []interface{}) error {
+// PatchObjectList when not found create new, if exists ,
+//run patch with merge type: "application/merge-patch+json"
+// another patch type：server-side apply， will add manage field
+func PatchObjectList(k *KubernetesClient, objList []interface{}) error {
 	var errors []error
 	for index, obj := range objList {
 		o, ok := obj.(runtime.Object)
@@ -221,6 +229,29 @@ func ApplyObjectList(k *KubernetesClient, objList []interface{}) error {
 			}
 			continue
 		}
+		if err != nil {
+			errors = append(errors, err)
+		}
+
+	}
+	return e.MergeError(errors)
+}
+
+func ApplyObjectList(k *KubernetesClient, objList []interface{}) error {
+	var errors []error
+	applyOpts := make([]ApplyOption, 0)
+	for index, obj := range objList {
+		o, ok := obj.(runtime.Object)
+		if !ok {
+			errors = append(errors, fmt.Errorf("object [%d] is not k8s object", index))
+			continue
+		}
+		gvrObj, err := DecodeToGvrObj(o, k)
+		if err != nil {
+			return err
+		}
+
+		err = k.Apply(context.TODO(), gvrObj.Unstructured, applyOpts...)
 		if err != nil {
 			errors = append(errors, err)
 		}

@@ -39,10 +39,35 @@ func TestCreate(t *testing.T) {
 	}
 }
 
-func TestApply(t *testing.T) {
+func TestPatch(t *testing.T) {
 	k := KubApp{
 		KubernetesClient: KubernetesClient{}.SetConfig(PathConfig{}).SetClient(),
 	}
+	testCases := []struct {
+		name string
+		path string
+	}{
+		{
+			name: "create from file dir",
+			path: "./test/yaml/apply",
+		},
+	}
+
+	for _, item := range testCases {
+		t.Run(item.name, func(t *testing.T) {
+			objs, err := GetObjList(item.path)
+			assert.Assert(t, err, nil)
+			err = k.SetObjectList(objs).Do(PatchObjectList)
+			assert.Assert(t, err, nil)
+		})
+	}
+}
+
+func TestApply(t *testing.T) {
+	k := KubApp{
+		KubernetesClient: NewClient().SetConfig(PathConfig{}).SetClient(),
+	}
+
 	testCases := []struct {
 		name string
 		path string
@@ -178,7 +203,7 @@ func TestApplyObjectFromTemplate(t *testing.T) {
 		t.Run(item.name, func(t *testing.T) {
 			objs, err := GetKubernetesObjectByBytes([]byte(item.objs))
 			assert.Assert(t, err, nil)
-			err = k.SetObjectList(objs).Do(ApplyObjectList)
+			err = k.SetObjectList(objs).Do(PatchObjectList)
 			if item.hasError {
 				assert.ErrorContains(t, err, item.errMsg)
 			} else {

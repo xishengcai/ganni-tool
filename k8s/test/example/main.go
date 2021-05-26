@@ -2,7 +2,6 @@ package main
 
 import (
 	. "github.com/xishengcai/ganni-tool/k8s"
-	"k8s.io/klog"
 )
 
 func main() {
@@ -15,9 +14,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	err = k.SetObjectList(objs).Do(ApplyObjectList)
+	err = k.SetObjectList(objs).Do(PatchObjectList)
 	if err != nil {
-		klog.Error(err)
+		panic(err)
 	}
 
 }

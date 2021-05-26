@@ -27,8 +27,16 @@ func TestGetClient(t *testing.T) {
 	for _, item := range testCase {
 		t.Run(item.name, func(t *testing.T) {
 			k := KubernetesClient{}.SetConfig(item.config).SetClient()
-			_, err := k.CoreClient.AppsV1().Deployments("").List(context.TODO(), v1.ListOptions{})
+			_, err := k.CoreClient.AppsV1().Deployments("default").List(context.TODO(), v1.ListOptions{})
 			assert.Assert(t, err, item.exception)
+
+			svc, err := k.CoreClient.CoreV1().
+				Services("default").
+				Get(context.TODO(),"default-nginx",v1.GetOptions{})
+			if err != nil{
+				t.Fatal(err)
+			}
+			t.Logf("%v", svc)
 		})
 	}
 }

@@ -3,13 +3,15 @@
 ## function
 - [x] create
 - [x] delete 
-- [x] apply
-- [ ] patch
+- [ ] apply
+- [x] patch
+    - [x] application/merge-patch+json
 
 ## spurt input type
 - [x] file
 - [x] []byte
 - [ ] url
+- [ ] ListKind
 
 ## spurt cache
 
@@ -20,7 +22,6 @@ package main
 
 import (
 	. "github.com/xishengcai/ganni-tool/k8s"
-	"k8s.io/klog"
 )
 
 func main() {
@@ -35,7 +36,7 @@ func main() {
 	}
 	err = k.SetObjectList(objs).Do(CreateObjectList)
 	if err != nil {
-		klog.Error(err)
+		panic(err)
 	}
 
 }
