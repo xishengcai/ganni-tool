@@ -19,7 +19,7 @@ var k8sScheme = runtime.NewScheme()
 
 const (
 	// AnnotationLastAppliedConfig records the previous configuration of a
-	// resource for use in a three way diff during a patching apply
+	// resource for use in a three way diff during a patching patch
 	AnnotationLastAppliedConfig = "ganni-tool/last-applied-configuration"
 )
 

@@ -209,7 +209,7 @@ func DecodeToGvrObj(obj runtime.Object, k *KubernetesClient) (*GvrObj, error) {
 
 // PatchObjectList when not found create new, if exists ,
 //run patch with merge type: "application/merge-patch+json"
-// another patch type：server-side apply， will add manage field
+// another patch type：server-side patch， will add manage field
 func PatchObjectList(k *KubernetesClient, objList []interface{}) error {
 	var errors []error
 	for index, obj := range objList {
@@ -239,7 +239,6 @@ func PatchObjectList(k *KubernetesClient, objList []interface{}) error {
 
 func ApplyObjectList(k *KubernetesClient, objList []interface{}) error {
 	var errors []error
-	applyOpts := make([]ApplyOption, 0)
 	for index, obj := range objList {
 		o, ok := obj.(runtime.Object)
 		if !ok {
@@ -251,7 +250,7 @@ func ApplyObjectList(k *KubernetesClient, objList []interface{}) error {
 			return err
 		}
 
-		err = k.Apply(context.TODO(), gvrObj.Unstructured, applyOpts...)
+		err = k.Apply(context.TODO(), gvrObj.Unstructured)
 		if err != nil {
 			errors = append(errors, err)
 		}
@@ -262,7 +261,7 @@ func ApplyObjectList(k *KubernetesClient, objList []interface{}) error {
 
 func patch(c client.Client, obj client.Object, patchType client.Patch) error {
 	return c.Patch(context.TODO(), obj, patchType, &client.PatchOptions{
-		FieldManager: "apply"})
+		FieldManager: "patch"})
 }
 
 type GvrObj struct {

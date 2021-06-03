@@ -78,7 +78,7 @@ func (k *KubernetesClient) Apply(ctx context.Context, desired client.Object, ao 
 		return nil
 	}
 
-	// the object already exists, apply new state
+	// the object already exists, patch new state
 	if err := executeApplyOptions(ctx, existing, desired, ao); err != nil {
 		return err
 	}

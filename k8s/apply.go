@@ -76,7 +76,7 @@ func executeApplyOptions(ctx context.Context, existing, desired client.Object, a
 	// ApplyOption function should handle this situation carefully by itself.
 	for _, fn := range aos {
 		if err := fn(ctx, existing, desired); err != nil {
-			return errors.Wrap(err, "cannot apply ApplyOption")
+			return errors.Wrap(err, "cannot patch ApplyOption")
 		}
 	}
 	return nil

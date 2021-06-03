@@ -53,13 +53,21 @@ metadata:
   namespace: launcher-test
 spec: {}
 ---
-# apply test, not found, then create new
+# patch test, not found, then create new
 apiVersion: v1
 kind: Service
 metadata:
   labels:
     app: launcher-svc-new
   name: launcher-svc-new
+  namespace: launcher-test
+spec: {}
+---
+# patch test, not found, then create new
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-patch-test
   namespace: launcher-test
 spec: {}
 ---

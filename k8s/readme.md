@@ -3,7 +3,7 @@
 ## function
 - [x] create
 - [x] delete 
-- [ ] apply
+- [x] apply
 - [x] patch
     - [x] application/merge-patch+json
 
@@ -30,7 +30,7 @@ func main() {
 	}
 
 	// todo: modify you yaml path
-	objs, err := GetObjList("../yaml/apply")
+	objs, err := GetObjList("../yaml/patch")
 	if err != nil {
 		panic(err)
 	}

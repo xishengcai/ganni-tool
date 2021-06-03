@@ -10,7 +10,7 @@ func main() {
 	}
 
 	// todo: modify you yaml path
-	objs, err := GetObjList("../yaml/apply")
+	objs, err := GetObjList("../yaml/patch")
 	if err != nil {
 		panic(err)
 	}
