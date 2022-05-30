@@ -108,7 +108,7 @@ func TestDelete(t *testing.T) {
 }
 
 func TestGetKubernetesObjectByPath(t *testing.T) {
-	obj, err := GetKubernetesObjectByPath([]string{"./test/yaml/crd/crd.yaml"})
+	obj, err := GetKubernetesObjectByPath([]string{"./test/yaml/crd"})
 	if err != nil {
 		t.Fatal(err)
 	}
