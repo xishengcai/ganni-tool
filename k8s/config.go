@@ -50,7 +50,7 @@ type DataBaseConfig struct {
 type getClusterConfig func(clusterID interface{}) (kubernetesConfig string, err error)
 
 func (dbg DataBaseConfig) GetConfig() (*rest.Config, error) {
-	klog.V(1).Info("cluster id: %d, begin get string(kubeConfig).", dbg.ClusterID)
+	klog.V(1).Infof("cluster id: %d, begin get string(kubeConfig).", dbg.ClusterID)
 	config, err := dbg.GetClusterConfig(dbg.ClusterID)
 	if err != nil {
 		return nil, err
