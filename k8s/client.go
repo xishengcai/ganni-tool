@@ -72,7 +72,7 @@ func (k *KubernetesClient) SetClient() *KubernetesClient {
 		klog.Errorf("get server version failed, %v", err)
 		return k
 	}
-	k.CRDGetter = CRDFromDynamic(k.DynamicClient, GetGVR(k.ServerVersion))
+	k.CRDGetter = CRDFromDynamic(k.DynamicClient, GetCrdGVR(k.ServerVersion))
 	return k
 }
 
@@ -119,10 +119,11 @@ func (k *KubernetesClient) Apply(ctx context.Context, desired client.Object, ao 
 	return errors.Wrapf(k.Client.Patch(ctx, desired, patch), "cannot patch object")
 }
 
-func GetGVR(serverVersion *apimachineryversion.Info) schema.GroupVersionResource {
+// GetCrdGVR apiextensions.k8s.io/v1beta1 CustomResourceDefinition is deprecated in v1.16+, unavailable in v1.22+; use
+func GetCrdGVR(serverVersion *apimachineryversion.Info) schema.GroupVersionResource {
 	f, _ := strconv.Atoi(serverVersion.Major)
 	s, _ := strconv.Atoi(serverVersion.Minor)
-	if f == 1 && s >= 22 {
+	if f == 1 && s >= 16 {
 		return crdV1
 	}
 	if f > 1 {
