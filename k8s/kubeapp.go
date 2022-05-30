@@ -86,7 +86,7 @@ func GetKubernetesObjectByBytes(ioBytes []byte) ([]interface{}, error) {
 }
 
 func GetObjByYamlFile(filePath string) (objList []interface{}, err error) {
-	klog.Infof("get object by yaml file: %s", filePath)
+	klog.V(1).Info("get object by yaml file: %s", filePath)
 	ioBytes, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return
@@ -124,7 +124,7 @@ func GetObjList(path string) (objs []interface{}, err error) {
 		if err != nil {
 			return nil, err
 		}
-		klog.Infof("path: %s, found k8s object: %d", path, len(objList))
+		klog.V(1).Info("path: %s, found k8s object: %d", path, len(objList))
 		objs = append(objs, objList...)
 	}
 	return
@@ -189,7 +189,7 @@ func DecodeToGvrObj(obj runtime.Object, k *KubernetesClient) (*GvrObj, error) {
 		}
 	}
 
-	klog.Infof("groupVersion: %s, group: %s, resource: %s", groupVersion, group, resource)
+	klog.V(1).Info("groupVersion: %s, group: %s, resource: %s", groupVersion, group, resource)
 	gvr := schema.GroupVersionResource{
 		Group:    group,
 		Version:  groupVersion,
