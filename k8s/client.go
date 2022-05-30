@@ -122,7 +122,7 @@ func (k *KubernetesClient) Apply(ctx context.Context, desired client.Object, ao 
 func GetGVR(serverVersion *apimachineryversion.Info) schema.GroupVersionResource {
 	f, _ := strconv.Atoi(serverVersion.Major)
 	s, _ := strconv.Atoi(serverVersion.Minor)
-	if f == 1 && s >= 12 {
+	if f == 1 && s >= 22 {
 		return crdV1
 	}
 	if f > 1 {
