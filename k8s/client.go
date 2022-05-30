@@ -2,14 +2,32 @@ package k8s
 
 import (
 	"context"
+	"k8s.io/klog"
+	"strconv"
 	"strings"
 
 	"github.com/pkg/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	apimachineryversion "k8s.io/apimachinery/pkg/version"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+)
+
+var (
+	crdV1Beta1 = schema.GroupVersionResource{
+		Group:    "apiextensions.k8s.io",
+		Version:  "v1beta1",
+		Resource: "customresourcedefinitions",
+	}
+
+	crdV1 = schema.GroupVersionResource{
+		Group:    "apiextensions.k8s.io",
+		Version:  "v1",
+		Resource: "customresourcedefinitions",
+	}
 )
 
 type KubernetesClient struct {
@@ -20,9 +38,9 @@ type KubernetesClient struct {
 	RestConfig      *rest.Config
 	resourceMapper  map[string]string
 	CRDGetter
-
 	creator
 	patcher
+	ServerVersion *apimachineryversion.Info
 }
 
 func NewClient() *KubernetesClient {
@@ -37,13 +55,24 @@ func (k *KubernetesClient) GetSlbIP() string {
 	return k.RestConfig.Host[0:x]
 }
 
+func (k *KubernetesClient) SetVersion() error {
+	var err error
+	k.ServerVersion, err = k.DiscoveryClient.ServerVersion()
+	return err
+}
+
 func (k *KubernetesClient) SetClient() *KubernetesClient {
 	k.Client, _ = client.New(k.RestConfig, client.Options{})
 	k.CoreClient, _ = kubernetes.NewForConfig(k.RestConfig)
 	k.DynamicClient, _ = dynamic.NewForConfig(k.RestConfig)
 	k.DiscoveryClient, _ = discovery.NewDiscoveryClientForConfig(k.RestConfig)
 	k.refreshApiResources()
-	k.CRDGetter = CRDFromDynamic(k.DynamicClient)
+	err := k.SetVersion()
+	if err != nil {
+		klog.Errorf("get server version failed, %v", err)
+		return k
+	}
+	k.CRDGetter = CRDFromDynamic(k.DynamicClient, GetGVR(k.ServerVersion))
 	return k
 }
 
@@ -88,4 +117,18 @@ func (k *KubernetesClient) Apply(ctx context.Context, desired client.Object, ao 
 		return errors.Wrap(err, "cannot calculate patch by computing a three way diff")
 	}
 	return errors.Wrapf(k.Client.Patch(ctx, desired, patch), "cannot patch object")
+}
+
+func GetGVR(serverVersion *apimachineryversion.Info) schema.GroupVersionResource {
+	f, _ := strconv.Atoi(serverVersion.Major)
+	s, _ := strconv.Atoi(serverVersion.Minor)
+	if f == 1 && s >= 12 {
+		return crdV1
+	}
+	if f > 1 {
+		return crdV1
+	}
+
+	return crdV1Beta1
+
 }

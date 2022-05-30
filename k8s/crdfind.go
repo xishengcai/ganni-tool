@@ -15,13 +15,9 @@ import (
 // CRDs.
 type CRDGetter func() ([]schema.GroupVersionKind, error)
 
-func CRDFromDynamic(client dynamic.Interface) CRDGetter {
+func CRDFromDynamic(client dynamic.Interface, gvr schema.GroupVersionResource) CRDGetter {
 	return func() ([]schema.GroupVersionKind, error) {
-		list, err := client.Resource(schema.GroupVersionResource{
-			Group:    "apiextensions.k8s.io",
-			Version:  "v1beta1",
-			Resource: "customresourcedefinitions",
-		}).List(context.TODO(), metav1.ListOptions{})
+		list, err := client.Resource(gvr).List(context.TODO(), metav1.ListOptions{})
 		if err != nil {
 			return nil, fmt.Errorf("failed to list CRDs: %v", err)
 		}
