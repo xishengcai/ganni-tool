@@ -60,13 +60,16 @@ func (k *KubernetesClient) SetVersion() error {
 	return err
 }
 
-// SetClient need set version before set CRDFromDynamic
 func (k *KubernetesClient) SetClient() *KubernetesClient {
 	k.Client, _ = client.New(k.RestConfig, client.Options{})
 	k.CoreClient, _ = kubernetes.NewForConfig(k.RestConfig)
 	k.DynamicClient, _ = dynamic.NewForConfig(k.RestConfig)
 	k.DiscoveryClient, _ = discovery.NewDiscoveryClientForConfig(k.RestConfig)
 	k.refreshApiResources()
+	return k
+}
+
+func (k *KubernetesClient) SetCRDGetter() *KubernetesClient {
 	k.CRDGetter = CRDFromDynamic(k.DynamicClient, GetCrdGVR(k.ServerVersion))
 	return k
 }
