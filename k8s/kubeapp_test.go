@@ -23,6 +23,10 @@ func TestCreate(t *testing.T) {
 			path: "./test/yaml/all_in_one/svc.yaml",
 		},
 	}
+	if err := k.SetVersion(); err != nil {
+		t.Fatal(err)
+	}
+	k.SetCRDGetter()
 
 	for _, item := range testCases {
 		t.Run(item.name, func(t *testing.T) {
@@ -38,6 +42,11 @@ func TestPatch(t *testing.T) {
 	k := KubApp{
 		KubernetesClient: KubernetesClient{}.SetConfig(PathConfig{}).SetClient(),
 	}
+	if err := k.SetVersion(); err != nil {
+		t.Fatal(err)
+	}
+	k.SetCRDGetter()
+
 	testCases := []struct {
 		name string
 		path string
@@ -62,6 +71,10 @@ func TestApply(t *testing.T) {
 	k := KubApp{
 		KubernetesClient: NewClient().SetConfig(PathConfig{}).SetClient(),
 	}
+	if err := k.SetVersion(); err != nil {
+		t.Fatal(err)
+	}
+	k.SetCRDGetter()
 
 	testCases := []struct {
 		name string
@@ -87,6 +100,10 @@ func TestDelete(t *testing.T) {
 	k := KubApp{
 		KubernetesClient: KubernetesClient{}.SetConfig(PathConfig{}).SetClient(),
 	}
+	if err := k.SetVersion(); err != nil {
+		t.Fatal(err)
+	}
+	k.SetCRDGetter()
 	testCases := []struct {
 		name string
 		path string
