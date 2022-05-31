@@ -2,7 +2,6 @@ package k8s
 
 import (
 	"context"
-	"k8s.io/klog"
 	"strconv"
 	"strings"
 
@@ -61,17 +60,13 @@ func (k *KubernetesClient) SetVersion() error {
 	return err
 }
 
+// SetClient need set version before set CRDFromDynamic
 func (k *KubernetesClient) SetClient() *KubernetesClient {
 	k.Client, _ = client.New(k.RestConfig, client.Options{})
 	k.CoreClient, _ = kubernetes.NewForConfig(k.RestConfig)
 	k.DynamicClient, _ = dynamic.NewForConfig(k.RestConfig)
 	k.DiscoveryClient, _ = discovery.NewDiscoveryClientForConfig(k.RestConfig)
 	k.refreshApiResources()
-	err := k.SetVersion()
-	if err != nil {
-		klog.Errorf("get server version failed, %v", err)
-		return k
-	}
 	k.CRDGetter = CRDFromDynamic(k.DynamicClient, GetCrdGVR(k.ServerVersion))
 	return k
 }
@@ -121,6 +116,9 @@ func (k *KubernetesClient) Apply(ctx context.Context, desired client.Object, ao 
 
 // GetCrdGVR apiextensions.k8s.io/v1beta1 CustomResourceDefinition is deprecated in v1.16+, unavailable in v1.22+; use
 func GetCrdGVR(serverVersion *apimachineryversion.Info) schema.GroupVersionResource {
+	if serverVersion == nil {
+		return crdV1
+	}
 	f, _ := strconv.Atoi(serverVersion.Major)
 	s, _ := strconv.Atoi(serverVersion.Minor)
 	if f == 1 && s >= 16 {
