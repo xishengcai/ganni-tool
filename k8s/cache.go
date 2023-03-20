@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	lru "github.com/hashicorp/golang-lru"
-	"k8s.io/klog"
+	"k8s.io/klog/v2"
 )
 
 /*

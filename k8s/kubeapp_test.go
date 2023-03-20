@@ -87,12 +87,11 @@ func TestApply(t *testing.T) {
 	}
 
 	for _, item := range testCases {
-		t.Run(item.name, func(t *testing.T) {
-			objs, err := GetObjList(item.path)
-			assert.Assert(t, err, nil)
-			err = k.SetObjectList(objs).Do(ApplyObjectList)
-			assert.Assert(t, err, nil)
-		})
+		t.Log("title: ", item.name)
+		objs, err := GetObjList(item.path)
+		assert.Assert(t, err, nil)
+		err = k.SetObjectList(objs).Do(ApplyObjectList)
+		assert.Assert(t, err, nil)
 	}
 }
 
