@@ -30,6 +30,7 @@ var (
 )
 
 type KubernetesClient struct {
+	RestClient      rest.RESTClient
 	Client          client.Client
 	CoreClient      *kubernetes.Clientset
 	DynamicClient   dynamic.Interface
@@ -60,13 +61,27 @@ func (k *KubernetesClient) SetVersion() error {
 	return err
 }
 
-func (k *KubernetesClient) SetClient() *KubernetesClient {
-	k.Client, _ = client.New(k.RestConfig, client.Options{})
-	k.CoreClient, _ = kubernetes.NewForConfig(k.RestConfig)
-	k.DynamicClient, _ = dynamic.NewForConfig(k.RestConfig)
-	k.DiscoveryClient, _ = discovery.NewDiscoveryClientForConfig(k.RestConfig)
-	k.refreshApiResources()
-	return k
+// SetClient ...
+func (k *KubernetesClient) SetClient() (*KubernetesClient, error) {
+	var err error
+	k.Client, err = client.New(k.RestConfig, client.Options{})
+	if err != nil {
+		return nil, err
+	}
+	k.CoreClient, err = kubernetes.NewForConfig(k.RestConfig)
+	if err != nil {
+		return nil, err
+	}
+	k.DynamicClient, err = dynamic.NewForConfig(k.RestConfig)
+	if err != nil {
+		return nil, err
+	}
+	k.DiscoveryClient, err = discovery.NewDiscoveryClientForConfig(k.RestConfig)
+	if err != nil {
+		return nil, err
+	}
+	err = k.refreshApiResources()
+	return k, err
 }
 
 func (k *KubernetesClient) SetCRDGetter() *KubernetesClient {
@@ -74,8 +89,11 @@ func (k *KubernetesClient) SetCRDGetter() *KubernetesClient {
 	return k
 }
 
-func (k *KubernetesClient) refreshApiResources() {
-	resources, _ := k.DiscoveryClient.ServerPreferredResources()
+func (k *KubernetesClient) refreshApiResources() error {
+	resources, err := k.DiscoveryClient.ServerPreferredResources()
+	if err != nil {
+		return err
+	}
 	for _, rList := range resources {
 		for _, r := range rList.APIResources {
 			if k.resourceMapper == nil {
@@ -84,6 +102,7 @@ func (k *KubernetesClient) refreshApiResources() {
 			k.resourceMapper[r.Kind] = r.Name
 		}
 	}
+	return nil
 }
 
 func (k KubernetesClient) SetConfig(g GetConfig) *KubernetesClient {

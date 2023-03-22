@@ -3,6 +3,8 @@ package k8s
 import (
 	"fmt"
 	"io/ioutil"
+	"net/http"
+	"net/url"
 	"os"
 
 	"k8s.io/client-go/rest"
@@ -63,7 +65,7 @@ func (dbg DataBaseConfig) GetConfig() (*rest.Config, error) {
 	return getRestConfig(config)
 }
 
-func (dbg DataBaseConfig) GetClient() *KubernetesClient {
+func (dbg DataBaseConfig) GetClient() (*KubernetesClient, error) {
 	return KubernetesClient{}.SetConfig(dbg).SetClient()
 }
 
@@ -94,4 +96,27 @@ func getRestConfigWithContext(context []byte) (*rest.Config, error) {
 	}
 	clientConfig := clientcmd.NewDefaultClientConfig(*config, &clientcmd.ConfigOverrides{})
 	return clientConfig.ClientConfig()
+}
+
+type Conf struct {
+	KubeConfig string
+	ProxyURL   string
+}
+
+func (c Conf) GetConfig() (*rest.Config, error) {
+	if c.KubeConfig == "" {
+		panic("KubeConfig is null")
+	}
+	restConfig, err := getRestConfigWithContext([]byte(c.KubeConfig))
+	if err != nil {
+		return nil, err
+	}
+	if len(c.ProxyURL) > 0 {
+		u, err := url.Parse(c.ProxyURL)
+		if err != nil {
+			return nil, err
+		}
+		restConfig.Proxy = http.ProxyURL(u)
+	}
+	return restConfig, nil
 }
