@@ -33,6 +33,31 @@ type KubApp struct {
 	ObjectList []interface{}
 }
 
+// NewDefaultKubApp ... use ~/.kube/config
+func NewDefaultKubApp() (*KubApp, error) {
+	c, err := NewClient().SetConfig(PathConfig{}).SetClient()
+	if err != nil {
+		return nil, err
+	}
+
+	return &KubApp{
+		KubernetesClient: c,
+	}, nil
+}
+
+// NewKubApp ... pass kubeConfig
+func NewKubApp(conf Conf) (*KubApp, error) {
+	c, err := NewClient().
+		SetConfig(conf).SetClient()
+	if err != nil {
+		return nil, err
+	}
+
+	return &KubApp{
+		KubernetesClient: c,
+	}, nil
+}
+
 type OperationFunc func(*KubernetesClient, []interface{}) error
 
 func (k *KubApp) SetKubernetesClient(c *KubernetesClient) *KubApp {
@@ -208,7 +233,7 @@ func DecodeToGvrObj(obj runtime.Object, k *KubernetesClient) (*GvrObj, error) {
 }
 
 // PatchObjectList when not found create new, if exists ,
-//run patch with merge type: "application/merge-patch+json"
+// run patch with merge type: "application/merge-patch+json"
 // another patch type：server-side patch， will add manage field
 func PatchObjectList(k *KubernetesClient, objList []interface{}) error {
 	var errors []error
