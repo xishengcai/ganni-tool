@@ -10,3 +10,4 @@ bin
 runtime/*
 !runtime/qrcode/bg.jpg
 !runtime/fonts
+ftp

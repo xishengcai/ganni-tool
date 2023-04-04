@@ -1,4 +1,4 @@
-package websocket
+package k8s
 
 import (
 	"context"

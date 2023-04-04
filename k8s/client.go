@@ -105,13 +105,13 @@ func (k *KubernetesClient) refreshApiResources() error {
 	return nil
 }
 
-func (k KubernetesClient) SetConfig(g GetConfig) *KubernetesClient {
+func (k *KubernetesClient) SetConfig(g GetConfig) *KubernetesClient {
 	config, err := g.GetConfig()
 	if err != nil {
 		panic(err)
 	}
 	k.RestConfig = config
-	return &k
+	return k
 }
 
 // Apply applies new state to an object or create it if not exist
