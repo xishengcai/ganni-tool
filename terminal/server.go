@@ -26,10 +26,16 @@ const EndOfTransmission = "\u0004"
 func main() {
 
 	file := http.FileServer(http.Dir("./terminal"))
-	http.Handle("/static/", http.StripPrefix("/static/", file))
+	http.Handle("/", http.StripPrefix("/", file))
 
 	http.HandleFunc("/ws", func(writer http.ResponseWriter, request *http.Request) {
+		namespace := request.FormValue("namespace")
+		if namespace == "" {
+			namespace = "default"
+		}
 
+		pod := request.FormValue("pod")
+		container := request.FormValue("container")
 		conn, err := wsUpgrade.Upgrade(writer, request, nil)
 		if err != nil {
 			klog.Errorf("web socket upgrade error %s", err)
@@ -38,7 +44,8 @@ func main() {
 		}
 
 		wc := WrapWsConn{
-			conn: conn,
+			conn:     conn,
+			sizeChan: make(chan remotecommand.TerminalSize),
 		}
 
 		config, err := k8s.PathConfig{}.GetConfig()
@@ -47,9 +54,9 @@ func main() {
 		}
 		client := kubernetes.NewForConfigOrDie(config)
 		err = k8s.StartProcess(client, config, &k8s.PodInfo{
-			Namespace:     "test",
-			PodName:       "app1-574c456bf-nk9jp",
-			ContainerName: "container-0",
+			Namespace:     namespace,
+			PodName:       pod,
+			ContainerName: container,
 		}, []string{"sh"}, remotecommand.StreamOptions{
 			Stdin:             wc,
 			Stdout:            wc,
@@ -100,7 +107,6 @@ func (w WrapWsConn) Write(p []byte) (n int, err error) {
 
 // Read get input, send to container
 func (w WrapWsConn) Read(p []byte) (n int, err error) {
-	fmt.Printf("read length: %d, context: %s  ", len(p), string(p))
 	_, x, err := w.conn.ReadMessage()
 	if err != nil {
 		return copy(p, EndOfTransmission), err
@@ -110,10 +116,8 @@ func (w WrapWsConn) Read(p []byte) (n int, err error) {
 	if err := json.Unmarshal(x, &msg); err != nil {
 		return copy(p, EndOfTransmission), err
 	}
-	err = w.conn.WriteMessage(1, []byte(msg.Data))
 	switch msg.Op {
 	case "stdin":
-		fmt.Println("stdin: ", msg.Data)
 		return copy(p, msg.Data), nil
 	case "resize":
 		w.sizeChan <- remotecommand.TerminalSize{Width: msg.Cols, Height: msg.Rows}

@@ -9,6 +9,17 @@
 <body>
 <div id="terminal" style="height: calc(100vh * 0.99)"></div>
 <script>
+    function getQueryVariable(variable) {
+        let query = window.location.search.substring(1);
+        let vars = query.split("&");
+        for (let i = 0; i < vars.length; i++) {
+            let pair = vars[i].split("=");
+            if (pair[0] == variable) {
+                return pair[1];
+            }
+        }
+        return ("");
+    }
     // xterm配置自适应大小插件
     Terminal.applyAddon(fit);
     // 创建终端
@@ -19,16 +30,17 @@
     // 取得输入焦点
     term.focus();
 
-    // namespace = getQueryVariable("envId");
-    // pod = getQueryVariable("podName");
-    // container = getQueryVariable("containerName");
-    // key = getQueryVariable("key")
-    // console.log(namespace, pod, container);
-    // if (namespace == false || pod == false || container == false || key == false) {
-    //     alert("Cannot get the pod!")
-    // }
-    // console.log(namespace, pod, container, key)
-    url = "ws://" + window.location.host+"/ws"
+    namespace = getQueryVariable("namespace");
+    pod = getQueryVariable("pod");
+    container = getQueryVariable("container");
+    key = getQueryVariable("key")
+    console.log(namespace, pod, container);
+    if (pod == "") {
+        // namespace default
+        alert("Cannot get the pod!")
+    }
+    console.log(namespace, pod, container)
+    url = "ws://" + window.location.host+"/ws?namespace="+namespace + "&pod="+pod+"&container="+container
     console.log(url);
 
     // 连接websocket
@@ -50,7 +62,6 @@
     // 当浏览器窗口变化时, 重新适配终端
     window.addEventListener("resize", function () {
         term.fit()
-
         // 把web终端的尺寸term.rows和term.cols发给服务端, 通知sshd调整输出宽度
         let msg = {op: "resize", rows: term.rows, cols: term.cols}
         ws.send(JSON.stringify(msg))

@@ -8,6 +8,15 @@
 - web shell
 ```
 go run terminal/server.go
+
+- faull path
+http://localhost/?namespace=test&pod=app1-574c456bf-nk9jp&container=container-0
+
+- namespace == default
+http://localhost/?namespace=default&pod=mysql-6c88f6df99-7tfrz&container=mysql-mysql
+
+- namespace == default, only one container
+http://localhost/?namespace=default&pod=mysql-6c88f6df99-7tfrz
 ```
 
 - apply yaml
