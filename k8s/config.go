@@ -66,12 +66,12 @@ func (dbg DataBaseConfig) GetConfig() (*rest.Config, error) {
 }
 
 func (dbg DataBaseConfig) GetClient() (*KubernetesClient, error) {
-	return KubernetesClient{}.SetConfig(dbg).SetClient()
+	client := KubernetesClient{}
+	return client.SetConfig(dbg).SetClient()
 }
 
 // InCluster pod run in cluster
-type InCluster struct {
-}
+type InCluster struct{}
 
 func (i InCluster) GetConfig() (*rest.Config, error) {
 	config := ctrl.GetConfigOrDie()

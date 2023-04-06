@@ -1,4 +1,4 @@
-package test
+package main
 
 import (
 	"os"
@@ -16,9 +16,12 @@ func main() {
 	}
 	client := kubernetes.NewForConfigOrDie(config)
 	err = k8s.StartProcess(client, config, &k8s.PodInfo{
-		Namespace:     "default",
-		PodName:       "rabbitmq-0",
-		ContainerName: "rabbitmq",
+		//Namespace:     "test",
+		//PodName:       "rabbitmq-0",
+		//ContainerName: "rabbitmq",
+		Namespace:     "test",
+		PodName:       "app1-574c456bf-nk9jp",
+		ContainerName: "container-0",
 	}, []string{"sh"}, remotecommand.StreamOptions{
 		Stdin:  os.Stdin,
 		Stdout: os.Stdout,
