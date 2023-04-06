@@ -1,3 +1,17 @@
+# gannil-tool
+
+## function list
+- webshell
+- apply yaml
+
+## example
+- web shell
+```
+go run terminal/server.go
+```
+
+- apply yaml
+```
 package main
 
 import (
@@ -23,3 +37,4 @@ func main() {
 		panic(err)
 	}
 }
+```

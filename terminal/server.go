@@ -25,7 +25,7 @@ const EndOfTransmission = "\u0004"
 
 func main() {
 
-	file := http.FileServer(http.Dir("/Users/xishengcai/go/src/github.com/xishengcai/ganni-tool/terminal"))
+	file := http.FileServer(http.Dir("./terminal"))
 	http.Handle("/static/", http.StripPrefix("/static/", file))
 
 	http.HandleFunc("/ws", func(writer http.ResponseWriter, request *http.Request) {
@@ -91,16 +91,11 @@ func (w WrapWsConn) Next() *remotecommand.TerminalSize {
 }
 
 func (w WrapWsConn) Write(p []byte) (n int, err error) {
-	//msg, err := json.Marshal(TerminalMessage{
-	//	Op:   "stdout",
-	//	Data: string(p),
-	//})
-	//if err != nil {
-	//	return 0, err
-	//}
-	fmt.Println("write: ", string(p))
 	err = w.conn.WriteMessage(1, p)
-	return 0, err
+	if err != nil {
+		return 0, err
+	}
+	return len(p), err
 }
 
 // Read get input, send to container
