@@ -12,10 +12,10 @@ go run terminal/server.go
 - faull path
 http://localhost/?namespace=test&pod=app1-574c456bf-nk9jp&container=container-0
 
-- namespace == default
-http://localhost/?namespace=default&pod=mysql-6c88f6df99-7tfrz&container=mysql-mysql
+- if namespace == default, could ignore
+http://localhost/?pod=mysql-6c88f6df99-7tfrz&container=mysql-mysql
 
-- namespace == default, only one container
+- if pod contains only one container, could ignore
 http://localhost/?namespace=default&pod=mysql-6c88f6df99-7tfrz
 ```
 

@@ -21,24 +21,27 @@
 package main
 
 import (
-	. "github.com/xishengcai/ganni-tool/k8s"
+  . "github.com/xishengcai/ganni-tool/k8s"
 )
 
 func main() {
-	k := KubApp{
-		KubernetesClient: KubernetesClient{}.SetConfig(PathConfig{}).SetClient(),
-	}
-
-	// todo: modify you yaml path
-	objs, err := GetObjList("../yaml/patch")
-	if err != nil {
-		panic(err)
-	}
-	err = k.SetObjectList(objs).Do(CreateObjectList)
-	if err != nil {
-		panic(err)
-	}
-
+  app, err := NewDefaultKubApp()
+  //app, err := NewKubApp(Conf{
+  //	KubeConfig: "",
+  //	ProxyURL:   "http://127.0.0.1:1087",
+  //})
+  if err != nil {
+    panic(err)
+  }
+  // todo: modify you yaml path
+  objs, err := GetObjList("../yaml/patch")
+  if err != nil {
+    panic(err)
+  }
+  err = app.SetObjectList(objs).Do(ApplyObjectList)
+  if err != nil {
+    panic(err)
+  }
 }
 
 ```
