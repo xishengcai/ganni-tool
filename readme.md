@@ -1,4 +1,6 @@
 # gannil-tool
+[![Go Report Card](https://goreportcard.com/badge/github.com/xishengcai/ganni-tool)](https://goreportcard.com/report/github.com/xishengcai/ganni-tool)
+[![Downloads](https://img.shields.io/github/downloads/xishengcai/ganni-tool/total.svg)](https://img.shields.io/github/downloads/xishengcai/ganni-tools/total.svg)
 
 ## function list
 - webshell
