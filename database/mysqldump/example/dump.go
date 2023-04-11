@@ -29,7 +29,11 @@ func main() {
 	// ignore database name
 	dns := "root:123456@tcp(localhost:3306)/?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai"
 
-	f, _ := os.Create(fmt.Sprintf("backup-20060102T150405.sql"))
+	//f, err := os.Create(fmt.Sprintf("backup-20060102T150405.sql"))
+	f, err := os.Create(fmt.Sprintf("dump.sql"))
+	if err != nil {
+		panic(err)
+	}
 	defer func() {
 		_ = f.Close()
 	}()

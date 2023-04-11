@@ -3,7 +3,7 @@
 [![Downloads](https://img.shields.io/github/downloads/xishengcai/ganni-tool/total.svg)](https://img.shields.io/github/downloads/xishengcai/ganni-tools/total.svg)
 
 ## function list
-- webshell
+- web shell
 - apply yaml
 
 ## example

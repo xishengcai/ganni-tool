@@ -7,7 +7,6 @@ this project is forked from "https://github.com/jarvanstack/mysqldump"
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
 
@@ -63,3 +62,14 @@ func main() {
 }
 
 ```
+
+
+## 内置数据库介绍
+- mysql
+mysql：这个是mysql的核心数据库，类似于sql server中的master表，主要负责存储数据库的用户、权限设置、关键字等mysql
+自己需要使用的控制和管理信息。不可以删除，如果对mysql不是很了解，也不要轻易修改这个数据库里面的表信息。
+
+## issue:
+- 1. 如何创建database
+- 2. 如何增量备份
+- 3. 如何备份视图

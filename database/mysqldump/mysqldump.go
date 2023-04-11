@@ -152,6 +152,13 @@ func Dump(dns string, opts ...DumpOption) error {
 
 	// 2. 获取表
 	for _, dbStr := range dbs {
+		buf.WriteString("--\n")
+		buf.WriteString("-- Current Database: `" + dbStr + "`\n")
+		buf.WriteString("--\n\n")
+		buf.WriteString(fmt.Sprintf("CREATE DATABASE /*!32312 IF NOT EXISTS*/ `%s` /*!40100 DEFAULT "+
+			"CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;\n", dbStr))
+		buf.WriteString("USE `" + dbStr + "`;\n")
+
 		_, err = db.Exec("USE `" + dbStr + "`")
 		if err != nil {
 			log.Printf("[error] %v \n", err)
@@ -171,6 +178,7 @@ func Dump(dns string, opts ...DumpOption) error {
 		}
 
 		// 3. 导出表
+		log.Printf("db: %s tables: %s \n", dbStr, tables)
 		for _, table := range tables {
 			// 删除表
 			if o.isDropTable {
@@ -180,7 +188,6 @@ func Dump(dns string, opts ...DumpOption) error {
 			// 导出表结构
 			err = writeTableStruct(db, table, buf)
 			if err != nil {
-				log.Printf("[error] %v \n", err)
 				return err
 			}
 
@@ -208,8 +215,9 @@ func Dump(dns string, opts ...DumpOption) error {
 
 func getCreateTableSQL(db *sql.DB, table string) (string, error) {
 	var createTableSQL string
-	err := db.QueryRow(fmt.Sprintf("SHOW CREATE TABLE %s", table)).Scan(&table, &createTableSQL)
+	err := db.QueryRow(fmt.Sprintf("SHOW CREATE TABLE `%s`;", table)).Scan(&table, &createTableSQL)
 	if err != nil {
+		log.Println("[error]: ", err)
 		return "", err
 	}
 	// IF NOT EXISTS
@@ -231,7 +239,9 @@ func getDBs(db *sql.DB) ([]string, error) {
 		if err != nil {
 			return nil, err
 		}
-		dbs = append(dbs, db)
+		if !ISInternalDatabase(db) {
+			dbs = append(dbs, db)
+		}
 	}
 	return dbs, nil
 }
@@ -263,7 +273,6 @@ func writeTableStruct(db *sql.DB, table string, buf *bufio.Writer) error {
 
 	createTableSQL, err := getCreateTableSQL(db, table)
 	if err != nil {
-		log.Printf("[error] %v \n", err)
 		return err
 	}
 	buf.WriteString(createTableSQL)

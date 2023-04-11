@@ -16,3 +16,12 @@ func GetDBNameFromDNS(dns string) (string, error) {
 
 	return "", fmt.Errorf("dns error: %s", dns)
 }
+
+func ISInternalDatabase(name string) bool {
+	switch name {
+	case "information_schema", "mysql", "performance_schema", "test", "sys":
+		return true
+	default:
+		return false
+	}
+}
