@@ -1,0 +1,43 @@
+# Default values for mysqlbackup.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: xishengcai/mysqlbackup
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: latest
+
+imagePullSecrets: []
+
+# schedule 定时任务策略
+schedule: "*/1 * * * *"
+
+# backup_db_list 要备份的数据库名称, 用空格隔开
+backup_db_list: "test1 test2"
+
+# source 数据同步，源数据库
+source:
+  host: "127.0.0.1"
+  port: 3306
+  user: "root"
+  password: "123456"
+
+# target 数据同步，目的数据库
+target:
+  host: "127.0.0.2"
+  port: 3306
+  user: "root"
+  password: "123456"
+
+
+resources:
+   limits:
+     cpu: 100m
+     memory: 50Mi
+   requests:
+     cpu: 100m
+     memory: 50Mi
+

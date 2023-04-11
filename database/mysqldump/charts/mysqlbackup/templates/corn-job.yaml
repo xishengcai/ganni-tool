@@ -1,0 +1,52 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "mysqlbackup.fullname" . }}
+  labels:
+    {{- include "mysqlbackup.labels" . | nindent 4 }}
+spec:
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    metadata: {}
+    spec:
+      template:
+        metadata: {}
+        spec:
+          containers:
+            - env:
+                - name: SOURCE_HOST
+                  value: {{ .Values.source.host }}
+                - name: SOURCE_PORT
+                  value: '{{ .Values.source.port }}'
+                - name: SOURCE_USER
+                  value: {{ .Values.source.user }}
+                - name: SOURCE_PASSWORD
+                  value: '{{ .Values.source.password }}'
+                - name: TARGET_HOST
+                  value: {{ .Values.target.host }}
+                - name: TARGET_PORT
+                  value: '{{ .Values.target.port }}'
+                - name: TARGET_USER
+                  value:  {{ .Values.target.user }}
+                - name: TARGET_PASSWORD
+                  value:  '{{ .Values.target.password }}'
+                - name: BACKUP_DB_LIST
+                  value: '{{ .Values.backup_db_list }}'
+              image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "latest" }}"
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              name: mysql
+              resources:
+                {{- toYaml .Values.resources | nindent 16 }}
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 8 }}
+          {{- end }}
+          restartPolicy: OnFailure
+          schedulerName: default-scheduler
+          terminationGracePeriodSeconds: 30
+  schedule: '{{ .Values.schedule }}'
+  successfulJobsHistoryLimit: 3
+  suspend: false
