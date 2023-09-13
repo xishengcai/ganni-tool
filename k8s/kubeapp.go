@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"k8s.io/apimachinery/pkg/util/yaml"
+	"k8s.io/klog/v2"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -21,7 +22,6 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/klog/v2"
 )
 
 var (
@@ -35,7 +35,7 @@ type KubApp struct {
 
 // NewDefaultKubApp ... use ~/.kube/config
 func NewDefaultKubApp() (*KubApp, error) {
-	c, err := NewClient().SetConfig(PathConfig{}).SetClient()
+	c, err := NewClient().SetConfig(InCluster{}).SetClient()
 	if err != nil {
 		return nil, err
 	}
